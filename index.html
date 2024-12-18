@@ -35,6 +35,10 @@
             border-radius: 5px;
             margin-top: 20px;
         }
+        .status {
+            font-size: 18px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -43,6 +47,7 @@
         <button class="case-button" id="openCaseBtn">Открыть кейс</button>
         <div class="emoji-display" id="emojiDisplay">🤷</div>
         <p>Эмоджи выпадет после открытия кейса!</p>
+        <div class="status" id="statusDisplay">Монеты: 10 | Оставшиеся попытки: 3</div>
     </div>
 
     <script>
@@ -53,15 +58,25 @@
         canvas.width = 800;
         canvas.height = 600;
 
-        // Эмоджи для выпадения
-        const emojiList = ["🥷", "👼", "💂", "🫅", "🤵", "🧑‍🚒", "👮"];
+        // Эмоджи для выпадения с редкостью
+        const emojiList = [
+            { emoji: "🥷", rarity: "Legendary" },
+            { emoji: "👼", rarity: "Epic" },
+            { emoji: "💂", rarity: "Epic" },
+            { emoji: "🫅", rarity: "Rare" },
+            { emoji: "🤵", rarity: "Rare" },
+            { emoji: "🧑‍🚒", rarity: "Common" },
+            { emoji: "👮", rarity: "Common" }
+        ];
 
-        // Игрок
+        // Статистика игрока
         const player = {
             x: canvas.width / 2,
             y: canvas.height / 2,
             size: 50,
             emoji: "🤷", // Эмодзи персонажа по умолчанию
+            coins: 10,  // Количество монет
+            attemptsLeft: 3,  // Количество попыток на день
             draw() {
                 ctx.font = "50px Arial";
                 ctx.fillText(this.emoji, this.x, this.y);
@@ -81,10 +96,31 @@
 
         // Функция для открытия кейса
         document.getElementById("openCaseBtn").addEventListener("click", () => {
-            const randomEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
-            document.getElementById("emojiDisplay").innerText = randomEmoji;
-            player.emoji = randomEmoji; // Смена эмоджи персонажа
+            if (player.coins > 0 && player.attemptsLeft > 0) {
+                // Делаем выпадение случайным
+                const randomIndex = Math.floor(Math.random() * emojiList.length);
+                const randomEmoji = emojiList[randomIndex];
+
+                // Показать выпадение
+                document.getElementById("emojiDisplay").innerText = randomEmoji.emoji;
+                player.emoji = randomEmoji.emoji;
+
+                // Показать редкость
+                alert(`Выпал персонаж: ${randomEmoji.emoji} (Редкость: ${randomEmoji.rarity})`);
+
+                // Обновить данные
+                player.coins -= 1;
+                player.attemptsLeft -= 1;
+                updateStatus();
+            } else {
+                alert("У вас нет монет или попыток на сегодня.");
+            }
         });
+
+        // Обновление статуса
+        function updateStatus() {
+            document.getElementById("statusDisplay").innerText = `Монеты: ${player.coins} | Оставшиеся попытки: ${player.attemptsLeft}`;
+        }
 
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
