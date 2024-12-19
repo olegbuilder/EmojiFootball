@@ -5,185 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emoji Football Game</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            font-size: 2em;
-        }
-        p {
-            font-size: 1.2em;
-        }
-        button {
-            font-size: 1.5em;
-            padding: 15px 30px;
-            margin: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .level-bar {
-            margin: 20px 0;
-            background: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            height: 30px;
-            width: 100%;
-        }
-        #levelBar {
-            height: 100%;
-            background: green;
-            width: 0%;
-            transition: width 0.5s;
-        }
-        #playersCollection, #locations {
-            margin-top: 20px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-        }
-        .player {
-            display: inline-block;
-            margin: 5px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: #fff;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .player:hover {
-            background: #007bff;
-            color: white;
-        }
+        /* Ваши стили */
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Emoji Football Game</h1>
-        <p>Монеты: <span id="coins">10</span> | Уровень: <span id="level">1</span> | Опыт: <span id="experience">0</span></p>
+        <div id="emojiDisplay">🤷</div>
+        <p>Откройте карту и получите футболистов!</p>
+
+        <div class="status">
+            <p>Монеты: <span id="coins">10</span> | Уровень: <span id="level">1</span> | Опыт: <span id="experience">0</span></p>
+        </div>
+
         <div class="level-bar">
-            <div id="levelBar"></div>
+            <div class="level-progress" id="levelProgress"></div>
         </div>
-        <button id="openCaseBtn">Открыть карту (1 монета)</button>
-        <button id="earnCoinsBtn">Получить монеты (50/50)</button>
-        <button id="dailyRewardBtn">Ежедневная награда</button>
-        <div id="playersCollection">
-            <h2>Коллекция</h2>
-            <p>Пока пусто</p>
+
+        <div class="button-container">
+            <button class="case-button" id="openCaseBtn">Открыть карту</button>
+            <button class="earn-button" id="earnCoinsBtn">Получить монеты (Риск 50/50)</button>
+            <button class="sell-button" id="sellPlayerBtn">Продать персонажа</button>
         </div>
-        <div id="locations">
-            <h2>Локации</h2>
-            <p id="location1">⛱️ Базовая локация</p>
-            <p id="location2" class="location-disabled">🥅 Локация "Гол" (Уровень 3)</p>
-            <p id="location3" class="location-disabled">🏟️ Локация "Стадион" (Уровень 6)</p>
+
+        <div class="collection" id="collection">
+            <h3>Ваша коллекция:</h3>
+            <div id="playersCollection"></div>
         </div>
     </div>
 
     <script>
-        let coins = 10;
-        let level = 1;
-        let experience = 0;
-        let collection = [];
+        document.addEventListener("DOMContentLoaded", () => {
+            // Весь скрипт начнёт работать после загрузки страницы
+            const emojiList = [
+                { emoji: "🥷", rarity: "Legendary", price: 50 },
+                { emoji: "👼", rarity: "Epic", price: 30 },
+                { emoji: "💂", rarity: "Epic", price: 30 },
+                { emoji: "🫅", rarity: "Rare", price: 20 },
+                { emoji: "🤵", rarity: "Rare", price: 20 },
+                { emoji: "🧑‍🚒", rarity: "Common", price: 10 },
+                { emoji: "👮", rarity: "Common", price: 10 }
+            ];
 
-        const coinsElement = document.getElementById("coins");
-        const levelElement = document.getElementById("level");
-        const experienceElement = document.getElementById("experience");
-        const levelBar = document.getElementById("levelBar");
-        const playersCollectionElement = document.getElementById("playersCollection");
+            let player = {
+                coins: 10,
+                level: 1,
+                experience: 0,
+                collection: []
+            };
 
-        // Обновление интерфейса
-        function updateUI() {
-            coinsElement.textContent = coins;
-            levelElement.textContent = level;
-            experienceElement.textContent = experience;
-            levelBar.style.width = `${(experience % 10) * 10}%`;
+            const updateUI = () => {
+                document.getElementById("coins").textContent = player.coins;
+                document.getElementById("level").textContent = player.level;
+                document.getElementById("experience").textContent = player.experience;
+                const collectionDiv = document.getElementById("playersCollection");
+                collectionDiv.innerHTML = player.collection
+                    .map(p => `<span>${p.emoji} (${p.rarity})</span>`)
+                    .join(", ");
+            };
 
-            // Отображение коллекции
-            playersCollectionElement.innerHTML = `<h2>Коллекция</h2>`;
-            collection.forEach((player, index) => {
-                const playerDiv = document.createElement("div");
-                playerDiv.className = "player";
-                playerDiv.textContent = player;
-                playerDiv.addEventListener("click", () => {
-                    sellPlayer(index);
-                });
-                playersCollectionElement.appendChild(playerDiv);
+            document.getElementById("openCaseBtn").addEventListener("click", () => {
+                if (player.coins >= 1) {
+                    player.coins--;
+                    const randomIndex = Math.floor(Math.random() * emojiList.length);
+                    const randomPlayer = emojiList[randomIndex];
+                    player.collection.push(randomPlayer);
+                    updateUI();
+                } else {
+                    alert("Недостаточно монет!");
+                }
             });
 
-            if (collection.length === 0) {
-                playersCollectionElement.innerHTML += "<p>Пока пусто</p>";
-            }
-        }
-
-        // Открытие карты
-        document.getElementById("openCaseBtn").addEventListener("click", () => {
-            if (coins >= 1) {
-                coins -= 1;
-                const newPlayer = "⚽"; // Пример игрока
-                collection.push(newPlayer);
+            document.getElementById("earnCoinsBtn").addEventListener("click", () => {
+                if (Math.random() > 0.5) {
+                    player.coins += 10;
+                    alert("Вы выиграли 10 монет!");
+                } else {
+                    alert("Вы проиграли! Попробуйте снова.");
+                }
                 updateUI();
-                alert(`Вы получили: ${newPlayer}`);
-            } else {
-                alert("Недостаточно монет!");
-            }
-        });
+            });
 
-        // Получение монет
-        document.getElementById("earnCoinsBtn").addEventListener("click", () => {
-            const chance = Math.random();
-            if (chance > 0.5) {
-                coins += 10;
-                experience += 2;
-                updateUI();
-                alert("Вы выиграли 10 монет!");
-            } else {
-                alert("Неудача! Попробуйте снова.");
-            }
-        });
+            document.getElementById("sellPlayerBtn").addEventListener("click", () => {
+                if (player.collection.length > 0) {
+                    const soldPlayer = player.collection.pop();
+                    player.coins += soldPlayer.price;
+                    alert(`Вы продали ${soldPlayer.emoji} за ${soldPlayer.price} монет.`);
+                    updateUI();
+                } else {
+                    alert("У вас нет персонажей для продажи.");
+                }
+            });
 
-        // Ежедневная награда
-        document.getElementById("dailyRewardBtn").addEventListener("click", () => {
-            coins += 20;
             updateUI();
-            alert("Вы получили ежедневную награду: 20 монет!");
         });
-
-        // Продажа игрока
-        function sellPlayer(index) {
-            const player = collection[index];
-            coins += 5;
-            experience += 1;
-            collection.splice(index, 1);
-            updateUI();
-            alert(`Вы продали: ${player}`);
-        }
-
-        // Обновить интерфейс при загрузке
-        updateUI();
     </script>
 </body>
 </html>
