@@ -1,27 +1,240 @@
-import random
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Football Game - FIFA Mobile Style</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .emoji-display {
+            font-size: 100px;
+            margin-top: 20px;
+        }
+        .button-container {
+            margin-top: 30px;
+        }
+        .case-button, .buy-button, .earn-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .case-button:disabled {
+            background-color: #c7c7c7;
+        }
+        .status {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        .collection {
+            margin-top: 40px;
+            font-size: 16px;
+        }
+        .player {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .player img {
+            width: 50px;
+            height: 50px;
+        }
+        .player .rarity {
+            font-size: 12px;
+            color: #888;
+        }
+        .card-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .card {
+            background-color: #f0f0f0;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
+        }
+        .card .card-name {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
 
-print("⚽ Добро пожаловать в Эмодзи-Футбол!")
-team1 = "🔵 Синие"
-team2 = "🔴 Красные"
-score1 = 0
-score2 = 0
+    <div class="container">
+        <h1>Emoji Football Game</h1>
+        <div id="emojiDisplay">🤷</div>
+        <p>Откройте карту и получите футболистов!</p>
 
-for i in range(5):  # 5 раундов (ударов)
-    print(f"Раунд {i + 1}:")
-    if random.choice([True, False]):
-        print(f"{team1} забивают гол! 🥅⚽")
-        score1 += 1
-    else:
-        print(f"{team2} забивают гол! 🥅⚽")
-        score2 += 1
+        <div class="status">
+            <p>Монеты: <span id="coins">10</span> | Попытки на сегодня: <span id="attempts">3</span></p>
+        </div>
 
-# Итоговый счет
-print("\n🏁 Финальный свисток!")
-print(f"{team1}: {score1} | {team2}: {score2}")
+        <div class="button-container">
+            <button class="case-button" id="openCaseBtn">Открыть карту (1 монета)</button>
+            <button class="buy-button" id="buyCoinsBtn">Купить монеты (5 монет за 1$)</button>
+            <button class="earn-button" id="earnCoinsBtn">Заработать монеты (Ежедневная награда)</button>
+        </div>
 
-if score1 > score2:
-    print(f"🎉 Победили {team1}!")
-elif score2 > score1:
-    print(f"🎉 Победили {team2}!")
-else:
-    print("🤝 Ничья!")
+        <div class="collection" id="collection">
+            <h3>Ваша коллекция:</h3>
+            <div id="playersCollection"></div>
+        </div>
+
+        <div class="card-container" id="cardContainer">
+            <h3>Карты для открытия:</h3>
+        </div>
+    </div>
+
+    <script>
+        // Список карт с игроками
+        const emojiList = [
+            { emoji: "🥷", rarity: "Legendary", image: "https://example.com/ninja.png" },
+            { emoji: "👼", rarity: "Epic", image: "https://example.com/angel.png" },
+            { emoji: "💂", rarity: "Epic", image: "https://example.com/guard.png" },
+            { emoji: "🫅", rarity: "Rare", image: "https://example.com/king.png" },
+            { emoji: "🤵", rarity: "Rare", image: "https://example.com/groom.png" },
+            { emoji: "🧑‍🚒", rarity: "Common", image: "https://example.com/firefighter.png" },
+            { emoji: "👮", rarity: "Common", image: "https://example.com/policeman.png" }
+        ];
+
+        const cardList = [
+            { name: "Стартовая карта", players: 1, rarity: "Common" },
+            { name: "Магическая карта", players: 3, rarity: "Rare" },
+            { name: "Легендарная карта", players: 5, rarity: "Epic" },
+            { name: "Уникальная карта", players: 7, rarity: "Legendary" }
+        ];
+
+        // Игрок
+        let player = {
+            coins: 10,  // Монеты
+            attempts: 3,  // Попытки на день
+            collection: []  // Коллекция игроков
+        };
+
+        // Функция для обновления статуса (монеты, попытки)
+        function updateStatus() {
+            document.getElementById("coins").textContent = player.coins;
+            document.getElementById("attempts").textContent = player.attempts;
+        }
+
+        // Функция для обновления коллекции
+        function updateCollection() {
+            const collectionDiv = document.getElementById("playersCollection");
+            collectionDiv.innerHTML = '';
+            player.collection.forEach(player => {
+                const playerDiv = document.createElement("div");
+                playerDiv.classList.add("player");
+                playerDiv.innerHTML = `
+                    <img src="${player.image}" alt="${player.emoji}">
+                    <div>${player.emoji}</div>
+                    <div class="rarity">${player.rarity}</div>
+                `;
+                collectionDiv.appendChild(playerDiv);
+            });
+        }
+
+        // Функция для отображения карт
+        function displayCards() {
+            const cardContainer = document.getElementById("cardContainer");
+            cardContainer.innerHTML = '';  // Очистка контейнера карт
+
+            cardList.forEach(card => {
+                const cardDiv = document.createElement("div");
+                cardDiv.classList.add("card");
+                cardDiv.innerHTML = `
+                    <div class="card-name">${card.name}</div>
+                    <div>Игроки: ${card.players}</div>
+                    <div>Редкость: ${card.rarity}</div>
+                    <button class="open-card-btn" data-players="${card.players}" data-rarity="${card.rarity}">Открыть карту</button>
+                `;
+                cardContainer.appendChild(cardDiv);
+            });
+        }
+
+        // Открытие карты
+        document.getElementById("openCaseBtn").addEventListener("click", () => {
+            if (player.coins > 0 && player.attempts > 0) {
+                const randomEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+
+                // Добавление в коллекцию
+                player.collection.push(randomEmoji);
+
+                // Обновление монет и попыток
+                player.coins -= 1;
+                player.attempts -= 1;
+
+                // Отображение выпадшего эмоджи
+                document.getElementById("emojiDisplay").textContent = randomEmoji.emoji;
+
+                // Обновление коллекции и статуса
+                updateCollection();
+                updateStatus();
+            } else {
+                alert("Недостаточно монет или попыток.");
+            }
+        });
+
+        // Покупка монет
+        document.getElementById("buyCoinsBtn").addEventListener("click", () => {
+            player.coins += 5;  // За 1$ покупаем 5 монет
+            updateStatus();
+        });
+
+        // Заработать монеты
+        document.getElementById("earnCoinsBtn").addEventListener("click", () => {
+            player.coins += 3;  // Ежедневная награда
+            updateStatus();
+        });
+
+        // Открытие карт
+        document.getElementById("cardContainer").addEventListener("click", (event) => {
+            if (event.target.classList.contains("open-card-btn")) {
+                const playersCount = event.target.getAttribute("data-players");
+                const rarity = event.target.getAttribute("data-rarity");
+                const selectedCard = cardList.find(card => card.players == playersCount && card.rarity == rarity);
+
+                if (selectedCard) {
+                    const cardPlayers = [];
+                    for (let i = 0; i < selectedCard.players; i++) {
+                        const randomEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+                        cardPlayers.push(randomEmoji);
+                        player.collection.push(randomEmoji);
+                    }
+
+                    alert(`Вы получили ${selectedCard.players} игроков с редкостью ${selectedCard.rarity}!`);
+
+                    // Обновление коллекции
+                    updateCollection();
+                    updateStatus();
+                }
+            }
+        });
+
+        // Инициализация
+        updateStatus();
+        updateCollection();
+        displayCards();
+
+    </script>
+
+</body>
+    </html>
