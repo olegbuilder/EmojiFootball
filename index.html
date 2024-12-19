@@ -14,7 +14,7 @@
         }
         .container {
             max-width: 800px;
-            margin: 0 auto;
+            margin: 20px auto;
             padding: 20px;
             background: white;
             border-radius: 10px;
@@ -22,7 +22,6 @@
         }
         h1 {
             font-size: 2em;
-            margin-bottom: 20px;
         }
         p {
             font-size: 1.2em;
@@ -66,9 +65,6 @@
             border-radius: 10px;
             border: 1px solid #ddd;
         }
-        .location-disabled {
-            color: #aaa;
-        }
         .player {
             display: inline-block;
             margin: 5px;
@@ -88,7 +84,7 @@
 <body>
     <div class="container">
         <h1>Emoji Football Game</h1>
-        <p>Монеты: <span id="coins">0</span> | Уровень: <span id="level">1</span> | Опыт: <span id="experience">0</span></p>
+        <p>Монеты: <span id="coins">10</span> | Уровень: <span id="level">1</span> | Опыт: <span id="experience">0</span></p>
         <div class="level-bar">
             <div id="levelBar"></div>
         </div>
@@ -108,7 +104,86 @@
     </div>
 
     <script>
-        // Скрипт игры как в предыдущем примере
+        let coins = 10;
+        let level = 1;
+        let experience = 0;
+        let collection = [];
+
+        const coinsElement = document.getElementById("coins");
+        const levelElement = document.getElementById("level");
+        const experienceElement = document.getElementById("experience");
+        const levelBar = document.getElementById("levelBar");
+        const playersCollectionElement = document.getElementById("playersCollection");
+
+        // Обновление интерфейса
+        function updateUI() {
+            coinsElement.textContent = coins;
+            levelElement.textContent = level;
+            experienceElement.textContent = experience;
+            levelBar.style.width = `${(experience % 10) * 10}%`;
+
+            // Отображение коллекции
+            playersCollectionElement.innerHTML = `<h2>Коллекция</h2>`;
+            collection.forEach((player, index) => {
+                const playerDiv = document.createElement("div");
+                playerDiv.className = "player";
+                playerDiv.textContent = player;
+                playerDiv.addEventListener("click", () => {
+                    sellPlayer(index);
+                });
+                playersCollectionElement.appendChild(playerDiv);
+            });
+
+            if (collection.length === 0) {
+                playersCollectionElement.innerHTML += "<p>Пока пусто</p>";
+            }
+        }
+
+        // Открытие карты
+        document.getElementById("openCaseBtn").addEventListener("click", () => {
+            if (coins >= 1) {
+                coins -= 1;
+                const newPlayer = "⚽"; // Пример игрока
+                collection.push(newPlayer);
+                updateUI();
+                alert(`Вы получили: ${newPlayer}`);
+            } else {
+                alert("Недостаточно монет!");
+            }
+        });
+
+        // Получение монет
+        document.getElementById("earnCoinsBtn").addEventListener("click", () => {
+            const chance = Math.random();
+            if (chance > 0.5) {
+                coins += 10;
+                experience += 2;
+                updateUI();
+                alert("Вы выиграли 10 монет!");
+            } else {
+                alert("Неудача! Попробуйте снова.");
+            }
+        });
+
+        // Ежедневная награда
+        document.getElementById("dailyRewardBtn").addEventListener("click", () => {
+            coins += 20;
+            updateUI();
+            alert("Вы получили ежедневную награду: 20 монет!");
+        });
+
+        // Продажа игрока
+        function sellPlayer(index) {
+            const player = collection[index];
+            coins += 5;
+            experience += 1;
+            collection.splice(index, 1);
+            updateUI();
+            alert(`Вы продали: ${player}`);
+        }
+
+        // Обновить интерфейс при загрузке
+        updateUI();
     </script>
 </body>
 </html>
