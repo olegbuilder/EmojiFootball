@@ -3,166 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emoji Football Game</title>
+    <title>Emoji Football Game - FIFA Mobile Style</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            background-color: #f0f0f0;
+            text-align: center;
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
         }
-
-        h1 {
-            margin-top: 20px;
-            font-size: 24px;
-            text-align: center;
-        }
-
         .container {
-            width: 90%;
-            max-width: 600px;
-            text-align: center;
-            margin-top: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-
         .status {
-            margin: 10px 0;
-            font-size: 18px;
+            margin: 20px 0;
         }
-
         .level-bar {
             width: 100%;
-            background-color: #ddd;
             height: 20px;
-            border-radius: 10px;
+            background-color: #ddd;
             margin: 10px 0;
-            position: relative;
         }
-
         .level-progress {
             height: 100%;
             background-color: #4caf50;
-            width: 0%;
-            border-radius: 10px;
-            transition: width 0.3s ease-in-out;
+            width: 0;
         }
-
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
         .button-container button {
-            display: block;
-            width: 100%;
-            max-width: 300px;
-            margin: 10px auto;
-            padding: 15px;
-            font-size: 18px;
-            color: white;
-            background-color: #007bff;
-            border: none;
-            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
             cursor: pointer;
+            border-radius: 5px;
+            border: none;
             transition: background-color 0.3s ease;
         }
-
         .button-container button:hover {
-            background-color: #0056b3;
+            background-color: #007bff;
+            color: #fff;
         }
-
-        .collection {
-            margin-top: 20px;
-            text-align: left;
-        }
-
-        .collection h3 {
-            font-size: 20px;
-            text-align: center;
-        }
-
-        .player {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            margin: 5px 0;
-            background-color: #fff;
-        }
-
-        .player img {
-            width: 50px;
-            height: 50px;
-            margin-right: 10px;
-        }
-
-        .player-info {
-            flex-grow: 1;
-            text-align: left;
-        }
-
         .location-container {
             margin-top: 20px;
         }
-
         .location {
             padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background-color: #eee;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #f4f4f4;
+            border-radius: 5px;
         }
-
         .location-disabled {
-            opacity: 0.5;
-            pointer-events: none;
+            background-color: #ddd;
+            cursor: not-allowed;
         }
-
-        #tutorialOverlay {
-            display: none;
+        #playersCollection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        #playersCollection div {
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f4f4f4;
+        }
+        .tutorial-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
+            color: #fff;
+            display: none;
             justify-content: center;
             align-items: center;
         }
-
         .tutorial-content {
-            background-color: white;
+            background-color: #333;
             padding: 20px;
             border-radius: 10px;
-            text-align: center;
-        }
-
-        .tutorial-content h2 {
-            margin-bottom: 20px;
-        }
-
-        .tutorial-content button {
-            padding: 10px 20px;
-            font-size: 18px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        .tutorial-content button:hover {
-            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
+
     <div class="container">
         <h1>Emoji Football Game</h1>
         <div id="emojiDisplay">🤷</div>
-        <p>Откройте карты и получите футболистов!</p>
+        <p>Откройте карту и получите футболистов!</p>
 
         <div class="status">
             <p>Монеты: <span id="coins">10</span> | Уровень: <span id="level">1</span> | Опыт: <span id="experience">0</span></p>
@@ -174,37 +112,154 @@
 
         <div class="button-container">
             <button class="case-button" id="openCaseBtn">Открыть карту (1 монета)</button>
+            <button class="buy-button" id="buyCoinsBtn">Купить монеты (5 монет за 1$)</button>
             <button class="earn-button" id="earnCoinsBtn">Получить монеты (Риск 50/50)</button>
             <button class="daily-reward-button" id="dailyRewardBtn">Ежедневные награды</button>
         </div>
 
-        <div class="collection">
+        <div class="collection" id="collection">
             <h3>Ваша коллекция:</h3>
-            <div id="playersCollection">
-                <!-- Коллекция персонажей появится здесь -->
-            </div>
+            <div id="playersCollection"></div>
         </div>
 
-        <div class="location-container">
+        <div class="location-container" id="locationContainer">
             <h3>Локации:</h3>
             <div id="location1" class="location">⛱️ Базовая локация</div>
             <div id="location2" class="location location-disabled">🥅 Локация "Гол" (Уровень 3)</div>
             <div id="location3" class="location location-disabled">🏟️ Локация "Стадион" (Уровень 6)</div>
         </div>
 
-        <!-- Обучение -->
-        <div id="tutorialOverlay">
-            <div class="tutorial-content">
-                <h2>Добро пожаловать!</h2>
-                <p>Цель игры - собирать футболистов и выигрывать монеты!</p>
-                <p>Вам дается стартовый персонаж 🧑‍💼!</p>
-                <button id="startTutorialBtn">Начать!</button>
+        <div class="card-container" id="cardContainer">
+            <h3>Карты для открытия:</h3>
+        </div>
+
+        <!-- Миссии -->
+        <div id="missionsContainer">
+            <h3>Миссии:</h3>
+            <div id="missions">
+                <button id="mission1Btn" class="missionBtn">Открыть 3 карты (Награда: 10 монет)</button>
+                <button id="mission2Btn" class="missionBtn">Получить 50 монет (Награда: Случайный футболист)</button>
+                <button id="mission3Btn" class="missionBtn">Достигнуть уровня 5 (Награда: 50 монет)</button>
             </div>
         </div>
+
+        <!-- Окно обучения -->
+        <div id="tutorialOverlay" class="tutorial-overlay">
+            <div class="tutorial-content">
+                <h2>Добро пожаловать в игру!</h2>
+                <p>Цель игры - открывать карты, собирать футболистов и зарабатывать монеты.</p>
+                <p>Вам дается стартовый персонаж 🧑‍💼, который поможет вам начать!</p>
+                <button id="startTutorialBtn">Начать играть</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // Подключим обновленные функции
+        const emojiList = [
+            { emoji: "🥷", rarity: "Legendary", image: "https://example.com/ninja.png", chance: 0.1 },
+            { emoji: "👼", rarity: "Epic", image: "https://example.com/angel.png", chance: 0.15 },
+            { emoji: "💂", rarity: "Epic", image: "https://example.com/guard.png", chance: 0.15 },
+            { emoji: "🫅", rarity: "Rare", image: "https://example.com/king.png", chance: 0.2 },
+            { emoji: "🤵", rarity: "Rare", image: "https://example.com/groom.png", chance: 0.2 },
+            { emoji: "🧑‍🚒", rarity: "Common", image: "https://example.com/firefighter.png", chance: 0.2 },
+            { emoji: "👮", rarity: "Common", image: "https://example.com/policeman.png", chance: 0.2 }
+        ];
+
+        let player = {
+            coins: 10,
+            level: 1,
+            experience: 0,
+            collection: [],
+            lastLogin: 0,
+            dailyRewardClaimed: false,
+            missionsCompleted: { mission1: false, mission2: false, mission3: false },
+            tutorialCompleted: false
+        };
+
+        function saveProgress() {
+            localStorage.setItem("playerData", JSON.stringify(player));
+        }
+
+        function loadProgress() {
+            const savedData = localStorage.getItem("playerData");
+            if (savedData) {
+                player = JSON.parse(savedData);
+            }
+        }
+
+        function updateStatus() {
+            document.getElementById("coins").textContent = player.coins;
+            document.getElementById("level").textContent = player.level;
+            document.getElementById("experience").textContent = player.experience;
+        }
+
+        function updateLevelProgress() {
+            const progress = (player.experience % 20) / 20 * 100;
+            document.getElementById("levelProgress").style.width = `${progress}%`;
+
+            if (player.experience >= 20) {
+                player.level += 1;
+                player.experience = 0;
+                alert(`Вы достигли уровня ${player.level}!`);
+                unlockLocations();
+            }
+        }
+
+        function unlockLocations() {
+            if (player.level >= 3) {
+                document.getElementById("location2").classList.remove("location-disabled");
+            }
+            if (player.level >= 6) {
+                document.getElementById("location3").classList.remove("location-disabled");
+            }
+        }
+
+        function updateCollection() {
+            const collectionDiv = document.getElementById("playersCollection");
+            collectionDiv.innerHTML = '';
+            player.collection.forEach(playerItem => {
+                const playerDiv = document.createElement('div');
+                playerDiv.innerHTML = `<img src="${playerItem.image}" alt="${playerItem.emoji}" /> ${playerItem.emoji} (${playerItem.rarity})`;
+                collectionDiv.appendChild(playerDiv);
+            });
+        }
+
+        // Начать обучение
+        function startTutorial() {
+            player.tutorialCompleted = true;
+            player.collection.push({ emoji: "🧑‍💼", rarity: "Common", image: "https://example.com/businessman.png", chance: 0.2 });
+            updateStatus();
+            updateCollection();
+            saveProgress();
+            document.getElementById("tutorialOverlay").style.display = "none";
+        }
+
+        // Обработчик кнопки "Начать играть"
+        document.getElementById("startTutorialBtn").addEventListener("click", startTutorial);
+
+        // Открыть карту
+        document.getElementById("openCaseBtn").addEventListener("click", () => {
+            if (player.coins >= 1) {
+                player.coins -= 1;
+                const randomPlayer = emojiList[Math.floor(Math.random() * emojiList.length)];
+                player.collection.push(randomPlayer);
+                player.experience += 1;
+                updateStatus();
+                updateLevelProgress();
+                updateCollection();
+                saveProgress();
+            }
+        });
+
+        loadProgress();  // Загрузка прогресса
+        updateStatus();
+        unlockLocations();
+
+        if (!player.tutorialCompleted) {
+            document.getElementById("tutorialOverlay").style.display = "block";
+        }
     </script>
+
 </body>
-    </html>
+                                                                                                   </html>
