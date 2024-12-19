@@ -79,6 +79,7 @@
         }
         .emoji-item {
             font-size: 40px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -99,7 +100,6 @@
 
     <div class="button-container">
         <button id="openCaseBtn">Открыть карту (1 монета)</button>
-        <button id="buyCoinsBtn">Купить монеты (5 монет за 1$)</button>
         <button id="earnCoinsBtn">Получить монеты (Риск 50/50)</button>
         <button id="dailyRewardBtn">Ежедневные награды</button>
     </div>
@@ -208,12 +208,6 @@
             }
         });
 
-        document.getElementById("buyCoinsBtn").addEventListener("click", () => {
-            player.coins += 5;
-            updateStatus();
-            saveProgress();
-        });
-
         document.getElementById("earnCoinsBtn").addEventListener("click", () => {
             const chance = Math.random();
             if (chance > 0.5) {
@@ -238,34 +232,3 @@
                 alert(`Вы получили ${rewardAmount} монет!`);
             } else {
                 alert("Вы уже забрали ежедневную награду сегодня.");
-            }
-            updateStatus();
-            saveProgress();
-        });
-
-        function displayCollection() {
-            const collectionContainer = document.getElementById("emojiCollection");
-            collectionContainer.innerHTML = '';
-            player.collection.forEach(player => {
-                const emojiItem = document.createElement("div");
-                emojiItem.classList.add("emoji-item");
-                emojiItem.textContent = player.emoji;
-                collectionContainer.appendChild(emojiItem);
-            });
-        }
-
-        function showTutorialIfNeeded() {
-            if (!player.tutorialCompleted) {
-                document.getElementById("tutorialOverlay").style.display = "flex";
-            }
-        }
-
-        loadProgress();
-        updateStatus();
-        unlockLocations();
-        displayCollection();
-        showTutorialIfNeeded();
-    </script>
-
-</body>
-    </html>
