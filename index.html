@@ -5,100 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emoji Football Game</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-        }
-        .button-container button {
-            margin: 10px;
-            padding: 15px 25px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-        }
-        .button-container button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        .collection, .locations {
-            margin: 20px 0;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
-        }
-        .location-disabled {
-            color: #888;
-            text-decoration: line-through;
-        }
-        .player {
-            display: inline-block;
-            margin: 5px;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        .level-bar-container {
-            margin: 20px auto;
-            width: 80%;
-            height: 20px;
-            background-color: #ccc;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .level-bar {
-            height: 100%;
-            background-color: #4CAF50;
-            width: 0;
-        }
+        /* Добавьте стили для вашего проекта */
     </style>
 </head>
 <body>
-    <h1>Emoji Football Game</h1>
-    <p>Монеты: <span id="coins">10</span> | Уровень: <span id="level">1</span> | Опыт: <span id="experience">0</span></p>
-
-    <!-- Шкала уровня -->
-    <div class="level-bar-container">
-        <div class="level-bar" id="levelBar"></div>
-    </div>
-
-    <div class="button-container">
+    <div class="container">
+        <h1>Emoji Football Game</h1>
+        <p>Монеты: <span id="coins">0</span> | Уровень: <span id="level">1</span> | Опыт: <span id="experience">0</span></p>
+        <div class="level-bar">
+            <div id="levelBar" style="background: green; width: 0%; height: 20px;"></div>
+        </div>
         <button id="openCaseBtn">Открыть карту (1 монета)</button>
-        <button id="earnCoinsBtn">Получить монеты (Риск 50/50)</button>
+        <button id="earnCoinsBtn">Получить монеты (50/50)</button>
         <button id="dailyRewardBtn">Ежедневная награда</button>
-    </div>
-
-    <div class="collection">
-        <h3>Коллекция персонажей</h3>
-        <p>Нажмите на персонажа, чтобы продать его.</p>
-        <div id="playersCollection">Пока пусто</div>
-    </div>
-
-    <div class="locations">
-        <h3>Локации</h3>
-        <div id="location1" class="location">⛱️ Базовая локация</div>
-        <div id="location2" class="location location-disabled">🥅 Локация "Гол" (Уровень 3)</div>
-        <div id="location3" class="location location-disabled">🏟️ Локация "Стадион" (Уровень 6)</div>
+        <div id="playersCollection">
+            <h2>Коллекция</h2>
+            <p>Пока пусто</p>
+        </div>
+        <div id="locations">
+            <h2>Локации</h2>
+            <p id="location1">⛱️ Базовая локация</p>
+            <p id="location2" class="location-disabled">🥅 Локация "Гол" (Уровень 3)</p>
+            <p id="location3" class="location-disabled">🏟️ Локация "Стадион" (Уровень 6)</p>
+        </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Игрок
-            const player = {
+            // Игровые данные
+            let player = {
                 coins: 10,
                 level: 1,
                 experience: 0,
                 collection: [],
             };
 
-            const maxExperience = 20; // Максимальное количество опыта для повышения уровня
+            const maxExperience = 20;
 
-            // Персонажи
             const emojiList = [
                 { emoji: "🥷", rarity: "Legendary", chance: 0.05, sellPrice: 15 },
                 { emoji: "👼", rarity: "Epic", chance: 0.1, sellPrice: 10 },
@@ -109,37 +52,30 @@
                 { emoji: "👮", rarity: "Common", chance: 0.3, sellPrice: 3 },
             ];
 
+            // Функции
+            function saveProgress() {
+                localStorage.setItem("emojiFootballGame", JSON.stringify(player));
+            }
+
+            function loadProgress() {
+                const savedData = localStorage.getItem("emojiFootballGame");
+                if (savedData) {
+                    player = JSON.parse(savedData);
+                }
+            }
+
             function updateStatus() {
                 document.getElementById("coins").textContent = player.coins;
                 document.getElementById("level").textContent = player.level;
                 document.getElementById("experience").textContent = player.experience;
                 updateLevelBar();
+                unlockLocations();
+                saveProgress();
             }
 
             function updateLevelBar() {
-                const levelBar = document.getElementById("levelBar");
                 const progress = (player.experience / maxExperience) * 100;
-                levelBar.style.width = `${progress}%`;
-            }
-
-            function updateCollection() {
-                const collectionDiv = document.getElementById("playersCollection");
-                if (player.collection.length === 0) {
-                    collectionDiv.textContent = "Пока пусто";
-                } else {
-                    collectionDiv.innerHTML = player.collection.map((p, index) => 
-                        `<span class="player" data-index="${index}" title="Продать за ${p.sellPrice} монет">${p.emoji} (${p.rarity})</span>`
-                    ).join("");
-                }
-
-                // Добавить обработчики для продажи персонажей
-                const players = document.querySelectorAll(".player");
-                players.forEach(playerElement => {
-                    playerElement.addEventListener("click", () => {
-                        const index = playerElement.getAttribute("data-index");
-                        sellCharacter(index);
-                    });
-                });
+                document.getElementById("levelBar").style.width = `${progress}%`;
             }
 
             function unlockLocations() {
@@ -149,6 +85,27 @@
                 if (player.level >= 6) {
                     document.getElementById("location3").classList.remove("location-disabled");
                 }
+            }
+
+            function updateCollection() {
+                const collectionDiv = document.getElementById("playersCollection");
+                if (player.collection.length === 0) {
+                    collectionDiv.innerHTML = "<p>Пока пусто</p>";
+                } else {
+                    collectionDiv.innerHTML = player.collection.map((p, index) => 
+                        `<span class="player" data-index="${index}" title="Продать за ${p.sellPrice} монет">${p.emoji} (${p.rarity})</span>`
+                    ).join("");
+                }
+
+                const players = document.querySelectorAll(".player");
+                players.forEach(playerElement => {
+                    playerElement.addEventListener("click", () => {
+                        const index = playerElement.getAttribute("data-index");
+                        sellCharacter(index);
+                    });
+                });
+
+                saveProgress();
             }
 
             function sellCharacter(index) {
@@ -162,6 +119,7 @@
                 }
             }
 
+            // Обработчики
             document.getElementById("openCaseBtn").addEventListener("click", () => {
                 if (player.coins >= 1) {
                     player.coins -= 1;
@@ -209,9 +167,10 @@
                 updateStatus();
             });
 
+            // Инициализация
+            loadProgress();
             updateStatus();
             updateCollection();
-            unlockLocations();
         });
     </script>
 </body>
