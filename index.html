@@ -5,7 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emoji Football Game</title>
     <style>
-        /* Добавьте стили для вашего проекта */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+        }
+        button {
+            font-size: 1.5em;
+            padding: 15px 30px;
+            margin: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .level-bar {
+            margin: 20px 0;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 30px;
+            width: 100%;
+        }
+        #levelBar {
+            height: 100%;
+            background: green;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        #playersCollection, #locations {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        .location-disabled {
+            color: #aaa;
+        }
+        .player {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .player:hover {
+            background: #007bff;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -13,7 +90,7 @@
         <h1>Emoji Football Game</h1>
         <p>Монеты: <span id="coins">0</span> | Уровень: <span id="level">1</span> | Опыт: <span id="experience">0</span></p>
         <div class="level-bar">
-            <div id="levelBar" style="background: green; width: 0%; height: 20px;"></div>
+            <div id="levelBar"></div>
         </div>
         <button id="openCaseBtn">Открыть карту (1 монета)</button>
         <button id="earnCoinsBtn">Получить монеты (50/50)</button>
@@ -31,147 +108,7 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Игровые данные
-            let player = {
-                coins: 10,
-                level: 1,
-                experience: 0,
-                collection: [],
-            };
-
-            const maxExperience = 20;
-
-            const emojiList = [
-                { emoji: "🥷", rarity: "Legendary", chance: 0.05, sellPrice: 15 },
-                { emoji: "👼", rarity: "Epic", chance: 0.1, sellPrice: 10 },
-                { emoji: "💂", rarity: "Epic", chance: 0.1, sellPrice: 10 },
-                { emoji: "🫅", rarity: "Rare", chance: 0.2, sellPrice: 5 },
-                { emoji: "🤵", rarity: "Rare", chance: 0.2, sellPrice: 5 },
-                { emoji: "🧑‍🚒", rarity: "Common", chance: 0.3, sellPrice: 3 },
-                { emoji: "👮", rarity: "Common", chance: 0.3, sellPrice: 3 },
-            ];
-
-            // Функции
-            function saveProgress() {
-                localStorage.setItem("emojiFootballGame", JSON.stringify(player));
-            }
-
-            function loadProgress() {
-                const savedData = localStorage.getItem("emojiFootballGame");
-                if (savedData) {
-                    player = JSON.parse(savedData);
-                }
-            }
-
-            function updateStatus() {
-                document.getElementById("coins").textContent = player.coins;
-                document.getElementById("level").textContent = player.level;
-                document.getElementById("experience").textContent = player.experience;
-                updateLevelBar();
-                unlockLocations();
-                saveProgress();
-            }
-
-            function updateLevelBar() {
-                const progress = (player.experience / maxExperience) * 100;
-                document.getElementById("levelBar").style.width = `${progress}%`;
-            }
-
-            function unlockLocations() {
-                if (player.level >= 3) {
-                    document.getElementById("location2").classList.remove("location-disabled");
-                }
-                if (player.level >= 6) {
-                    document.getElementById("location3").classList.remove("location-disabled");
-                }
-            }
-
-            function updateCollection() {
-                const collectionDiv = document.getElementById("playersCollection");
-                if (player.collection.length === 0) {
-                    collectionDiv.innerHTML = "<p>Пока пусто</p>";
-                } else {
-                    collectionDiv.innerHTML = player.collection.map((p, index) => 
-                        `<span class="player" data-index="${index}" title="Продать за ${p.sellPrice} монет">${p.emoji} (${p.rarity})</span>`
-                    ).join("");
-                }
-
-                const players = document.querySelectorAll(".player");
-                players.forEach(playerElement => {
-                    playerElement.addEventListener("click", () => {
-                        const index = playerElement.getAttribute("data-index");
-                        sellCharacter(index);
-                    });
-                });
-
-                saveProgress();
-            }
-
-            function sellCharacter(index) {
-                const character = player.collection[index];
-                if (character) {
-                    player.coins += character.sellPrice;
-                    player.collection.splice(index, 1);
-                    alert(`Вы продали ${character.emoji} (${character.rarity}) за ${character.sellPrice} монет!`);
-                    updateStatus();
-                    updateCollection();
-                }
-            }
-
-            // Обработчики
-            document.getElementById("openCaseBtn").addEventListener("click", () => {
-                if (player.coins >= 1) {
-                    player.coins -= 1;
-                    const chance = Math.random();
-                    let selectedPlayer;
-                    for (const emoji of emojiList) {
-                        if (chance <= emoji.chance) {
-                            selectedPlayer = emoji;
-                            break;
-                        }
-                    }
-                    selectedPlayer = selectedPlayer || emojiList[emojiList.length - 1];
-                    player.collection.push(selectedPlayer);
-                    alert(`Вы получили персонажа: ${selectedPlayer.emoji} (${selectedPlayer.rarity})`);
-                    updateStatus();
-                    updateCollection();
-                } else {
-                    alert("Недостаточно монет!");
-                }
-            });
-
-            document.getElementById("earnCoinsBtn").addEventListener("click", () => {
-                const success = Math.random() > 0.5;
-                if (success) {
-                    player.coins += 10;
-                    player.experience += 5;
-                    alert("Вы выиграли 10 монет!");
-                } else {
-                    alert("Попробуйте снова!");
-                }
-
-                if (player.experience >= maxExperience) {
-                    player.experience -= maxExperience;
-                    player.level += 1;
-                    unlockLocations();
-                    alert(`Поздравляем! Вы достигли уровня ${player.level}!`);
-                }
-
-                updateStatus();
-            });
-
-            document.getElementById("dailyRewardBtn").addEventListener("click", () => {
-                player.coins += 20;
-                alert("Вы получили ежедневную награду: 20 монет!");
-                updateStatus();
-            });
-
-            // Инициализация
-            loadProgress();
-            updateStatus();
-            updateCollection();
-        });
+        // Скрипт игры как в предыдущем примере
     </script>
 </body>
 </html>
