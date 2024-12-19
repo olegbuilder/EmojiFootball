@@ -233,6 +233,45 @@
             });
         }
 
+        // Обработка кнопки "Открыть карту"
+        document.getElementById("openCaseBtn").addEventListener("click", () => {
+            if (player.coins >= 1 && player.attempts > 0) {
+                // Снижаем монеты и количество попыток
+                player.coins -= 1;
+                player.attempts -= 1;
+
+                // Определяем случайного игрока
+                const randomPlayer = emojiList[Math.floor(Math.random() * emojiList.length)];
+
+                // Добавляем в коллекцию
+                player.collection.push(randomPlayer);
+
+                // Обновляем коллекцию и статус
+                updateCollection();
+                updateStatus();
+                alert(`Вы получили игрока: ${randomPlayer.emoji}`);
+            } else {
+                alert("Недостаточно монет или попыток.");
+            }
+        });
+
+        // Обработка кнопки "Получить монеты (Риск 50/50)"
+        document.getElementById("earnCoinsBtn").addEventListener("click", () => {
+            if (player.attempts > 0) {
+                const chance = Math.random(); // 50/50 шанс
+                if (chance < 0.5) {
+                    player.coins += 5;  // Выиграл, получаем 5 монет
+                    alert("Вы выиграли 5 монет!");
+                } else {
+                    alert("Вы проиграли, монеты не добавлены.");
+                }
+                player.attempts -= 1; // Уменьшаем количество попыток
+                updateStatus();
+            } else {
+                alert("У вас нет попыток на сегодня.");
+            }
+        });
+
         // Обработка кнопки "Ежедневные награды"
         document.getElementById("dailyRewardBtn").addEventListener("click", () => {
             const currentDay = (player.lastLogin + 1) % 7;  // Определяем день недели (0-6)
