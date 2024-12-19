@@ -76,7 +76,7 @@
             transition: 0.3s;
         }
         .player:hover {
-            background: #007bff;
+            background: #ff4d4d;
             color: white;
         }
     </style>
@@ -90,6 +90,7 @@
         </div>
         <button id="openCaseBtn">Открыть карту (1 монета)</button>
         <button id="earnCoinsBtn">Получить монеты (50/50)</button>
+        <button id="dailyRewardBtn">Ежедневная награда</button>
         <div id="playersCollection">
             <h2>Коллекция</h2>
             <p>Пока пусто</p>
@@ -111,6 +112,7 @@
         let level = 1;
         let experience = 0;
         let collection = [];
+        let dailyRewardClaimed = false;
 
         const coinsElement = document.getElementById("coins");
         const levelElement = document.getElementById("level");
@@ -125,10 +127,13 @@
             levelBar.style.width = `${(experience % 10) * 10}%`;
 
             playersCollectionElement.innerHTML = `<h2>Коллекция</h2>`;
-            collection.forEach(player => {
+            collection.forEach((player, index) => {
                 const playerDiv = document.createElement("div");
                 playerDiv.className = "player";
                 playerDiv.textContent = `${player.emoji} (${player.rarity})`;
+                playerDiv.addEventListener("click", () => {
+                    sellPlayer(index);
+                });
                 playersCollectionElement.appendChild(playerDiv);
             });
 
@@ -148,6 +153,15 @@
                 }
             }
             return emojiList[emojiList.length - 1];
+        }
+
+        function sellPlayer(index) {
+            const player = collection[index];
+            coins += 5;
+            experience += 1;
+            collection.splice(index, 1);
+            updateUI();
+            alert(`Вы продали: ${player.emoji}`);
         }
 
         document.getElementById("openCaseBtn").addEventListener("click", () => {
@@ -170,6 +184,17 @@
                 alert("Вы выиграли 10 монет!");
             } else {
                 alert("Неудача! Попробуйте снова.");
+            }
+        });
+
+        document.getElementById("dailyRewardBtn").addEventListener("click", () => {
+            if (!dailyRewardClaimed) {
+                coins += 20;
+                dailyRewardClaimed = true;
+                updateUI();
+                alert("Вы получили ежедневную награду: 20 монет!");
+            } else {
+                alert("Ежедневная награда уже получена! Попробуйте завтра.");
             }
         });
 
