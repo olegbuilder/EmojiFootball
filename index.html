@@ -3,232 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emoji Football Game - FIFA Mobile Style</title>
+    <title>Emoji Football Game</title>
     <style>
-        /* Стили для улучшения интерфейса */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
             text-align: center;
-            padding: 20px;
         }
         .button-container button {
-            font-size: 20px;
-            padding: 20px;
             margin: 10px;
+            padding: 15px 25px;
+            font-size: 16px;
             border: none;
+            border-radius: 5px;
             background-color: #4CAF50;
             color: white;
-            border-radius: 10px;
-            cursor: pointer;
-            width: 200px;
-        }
-        .button-container button:hover {
-            background-color: #45a049;
-        }
-        .level-bar {
-            width: 100%;
-            background-color: #ddd;
-            height: 30px;
-            border-radius: 15px;
-            margin-top: 20px;
-            position: relative;
-        }
-        .level-progress {
-            height: 100%;
-            background-color: #4CAF50;
-            border-radius: 15px;
-            width: 0%;
-        }
-        .tutorial-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .tutorial-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        .emoji-display {
-            font-size: 80px;
-        }
-        .collection, .missions {
-            margin-top: 20px;
-        }
-        .location {
-            font-size: 20px;
-            margin-top: 10px;
             cursor: pointer;
         }
-        .location-disabled {
-            color: #ccc;
-        }
-        #emojiCollection {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-        }
-        .emoji-item {
-            font-size: 40px;
-            cursor: pointer;
+        .button-container button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
-
     <h1>Emoji Football Game</h1>
-    
-    <div id="emojiDisplay" class="emoji-display">🤷</div>
-    <p>Откройте карту и получите футболистов!</p>
-
-    <div class="status">
-        <p>Монеты: <span id="coins">10</span> | Уровень: <span id="level">1</span> | Опыт: <span id="experience">0</span></p>
-    </div>
-
-    <div class="level-bar">
-        <div id="levelProgress" class="level-progress"></div>
-    </div>
+    <p>Монеты: <span id="coins">10</span> | Уровень: <span id="level">1</span> | Опыт: <span id="experience">0</span></p>
 
     <div class="button-container">
         <button id="openCaseBtn">Открыть карту (1 монета)</button>
         <button id="earnCoinsBtn">Получить монеты (Риск 50/50)</button>
-        <button id="dailyRewardBtn">Ежедневные награды</button>
-    </div>
-
-    <div class="collection">
-        <h3>Ваша коллекция:</h3>
-        <div id="emojiCollection"></div>
-    </div>
-
-    <div class="location-container">
-        <h3>Локации:</h3>
-        <div id="location1" class="location">⛱️ Базовая локация</div>
-        <div id="location2" class="location location-disabled">🥅 Локация "Гол" (Уровень 3)</div>
-        <div id="location3" class="location location-disabled">🏟️ Локация "Стадион" (Уровень 6)</div>
-    </div>
-
-    <div id="tutorialOverlay" class="tutorial-overlay">
-        <div class="tutorial-content">
-            <h2>Добро пожаловать в игру!</h2>
-            <p>Цель игры - открывать карты, собирать футболистов и зарабатывать монеты.</p>
-            <p>Давайте начнем с того, как открыть карту и получить нового футболиста!</p>
-            <button id="startTutorialBtn">Начать обучение</button>
-        </div>
+        <button id="dailyRewardBtn">Ежедневная награда</button>
     </div>
 
     <script>
-        const emojiList = [
-            { emoji: "🥷", rarity: "Legendary", image: "https://example.com/ninja.png", chance: 0.1 },
-            { emoji: "👼", rarity: "Epic", image: "https://example.com/angel.png", chance: 0.15 },
-            { emoji: "💂", rarity: "Epic", image: "https://example.com/guard.png", chance: 0.15 },
-            { emoji: "🫅", rarity: "Rare", image: "https://example.com/king.png", chance: 0.2 },
-            { emoji: "🤵", rarity: "Rare", image: "https://example.com/groom.png", chance: 0.2 },
-            { emoji: "🧑‍🚒", rarity: "Common", image: "https://example.com/firefighter.png", chance: 0.2 },
-            { emoji: "👮", rarity: "Common", image: "https://example.com/policeman.png", chance: 0.2 }
-        ];
+        document.addEventListener("DOMContentLoaded", () => {
+            // Инициализация игрока
+            const player = {
+                coins: 10,
+                level: 1,
+                experience: 0,
+            };
 
-        let player = {
-            coins: 10,
-            level: 1,
-            experience: 0,
-            collection: [],
-            lastLogin: 0,
-            dailyRewardClaimed: false,
-            missionsCompleted: { mission1: false, mission2: false, mission3: false },
-            tutorialCompleted: false
-        };
-
-        function saveProgress() {
-            localStorage.setItem("playerData", JSON.stringify(player));
-        }
-
-        function loadProgress() {
-            const savedData = localStorage.getItem("playerData");
-            if (savedData) {
-                player = JSON.parse(savedData);
+            // Обновление статуса на экране
+            function updateStatus() {
+                document.getElementById("coins").textContent = player.coins;
+                document.getElementById("level").textContent = player.level;
+                document.getElementById("experience").textContent = player.experience;
             }
-        }
 
-        function updateStatus() {
-            document.getElementById("coins").textContent = player.coins;
-            document.getElementById("level").textContent = player.level;
-            document.getElementById("experience").textContent = player.experience;
-        }
+            // Открытие карты
+            document.getElementById("openCaseBtn").addEventListener("click", () => {
+                if (player.coins >= 1) {
+                    player.coins -= 1;
+                    player.experience += 2; // Опыт за открытие карты
+                    alert("Вы открыли карту!");
+                    updateStatus();
+                } else {
+                    alert("Недостаточно монет!");
+                }
+            });
 
-        function updateLevelProgress() {
-            const progress = (player.experience % 20) / 20 * 100;
-            document.getElementById("levelProgress").style.width = `${progress}%`;
-
-            if (player.experience >= 20) {
-                player.level += 1;
-                player.experience = 0;
-                alert(`Вы достигли уровня ${player.level}!`);
-                unlockLocations();
-            }
-        }
-
-        function unlockLocations() {
-            if (player.level >= 3) {
-                document.getElementById("location2").classList.remove("location-disabled");
-            }
-            if (player.level >= 6) {
-                document.getElementById("location3").classList.remove("location-disabled");
-            }
-        }
-
-        function startTutorial() {
-            player.tutorialCompleted = true;
-            player.collection.push({ emoji: "🧑‍💼", rarity: "Common", image: "https://example.com/businessman.png", chance: 0.2 });
-            updateStatus();
-            saveProgress();
-            document.getElementById("tutorialOverlay").style.display = "none";
-        }
-
-        document.getElementById("startTutorialBtn").addEventListener("click", startTutorial);
-
-        document.getElementById("openCaseBtn").addEventListener("click", () => {
-            if (player.coins >= 1) {
-                player.coins -= 1;
-                const randomPlayer = emojiList[Math.floor(Math.random() * emojiList.length)];
-                player.collection.push(randomPlayer);
-                player.experience += 1;
+            // Риск получения монет
+            document.getElementById("earnCoinsBtn").addEventListener("click", () => {
+                const success = Math.random() > 0.5;
+                if (success) {
+                    player.coins += 10;
+                    player.experience += 1;
+                    alert("Вы выиграли 10 монет!");
+                } else {
+                    alert("Попробуйте снова!");
+                }
                 updateStatus();
-                updateLevelProgress();
-                saveProgress();
-                displayCollection();
-            }
-        });
+            });
 
-        document.getElementById("earnCoinsBtn").addEventListener("click", () => {
-            const chance = Math.random();
-            if (chance > 0.5) {
-                player.coins += 10;
-                alert("Вы выиграли 10 монет!");
-                player.experience += 1;
-                updateLevelProgress();
-            } else {
-                alert("Попробуйте снова!");
-            }
+            // Ежедневная награда
+            document.getElementById("dailyRewardBtn").addEventListener("click", () => {
+                if (player.coins < 20) {
+                    player.coins += 20;
+                    alert("Вы получили ежедневную награду: 20 монет!");
+                    updateStatus();
+                } else {
+                    alert("Вы уже получили награду!");
+                }
+            });
+
+            // Обновить интерфейс при загрузке
             updateStatus();
-            saveProgress();
         });
-
-        document.getElementById("dailyRewardBtn").addEventListener("click", () => {
-            const currentDate = new Date().toDateString();
-            if (player.lastLogin !== currentDate && !player.dailyRewardClaimed) {
-                const rewardAmount = 20;
-                player.coins += rewardAmount;
-                player.dailyRewardClaimed = true;
-                player.lastLogin = currentDate;
-                alert(`Вы получили ${rewardAmount} монет!`);
-            } else {
-                alert("Вы уже забрали ежедневную награду сегодня.");
+    </script>
+</body>
+</html>
