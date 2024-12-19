@@ -90,20 +90,23 @@
         </div>
         <button id="openCaseBtn">Открыть карту (1 монета)</button>
         <button id="earnCoinsBtn">Получить монеты (50/50)</button>
-        <button id="dailyRewardBtn">Ежедневная награда</button>
         <div id="playersCollection">
             <h2>Коллекция</h2>
             <p>Пока пусто</p>
         </div>
-        <div id="locations">
-            <h2>Локации</h2>
-            <p id="location1">⛱️ Базовая локация</p>
-            <p id="location2" class="location-disabled">🥅 Локация "Гол" (Уровень 3)</p>
-            <p id="location3" class="location-disabled">🏟️ Локация "Стадион" (Уровень 6)</p>
-        </div>
     </div>
 
     <script>
+        const emojiList = [
+            { emoji: "🥷", rarity: "Legendary", chance: 0.1 },
+            { emoji: "👼", rarity: "Epic", chance: 0.15 },
+            { emoji: "💂", rarity: "Epic", chance: 0.15 },
+            { emoji: "🫅", rarity: "Rare", chance: 0.2 },
+            { emoji: "🤵", rarity: "Rare", chance: 0.2 },
+            { emoji: "🧑‍🚒", rarity: "Common", chance: 0.2 },
+            { emoji: "👮", rarity: "Common", chance: 0.2 }
+        ];
+
         let coins = 10;
         let level = 1;
         let experience = 0;
@@ -115,22 +118,17 @@
         const levelBar = document.getElementById("levelBar");
         const playersCollectionElement = document.getElementById("playersCollection");
 
-        // Обновление интерфейса
         function updateUI() {
             coinsElement.textContent = coins;
             levelElement.textContent = level;
             experienceElement.textContent = experience;
             levelBar.style.width = `${(experience % 10) * 10}%`;
 
-            // Отображение коллекции
             playersCollectionElement.innerHTML = `<h2>Коллекция</h2>`;
-            collection.forEach((player, index) => {
+            collection.forEach(player => {
                 const playerDiv = document.createElement("div");
                 playerDiv.className = "player";
-                playerDiv.textContent = player;
-                playerDiv.addEventListener("click", () => {
-                    sellPlayer(index);
-                });
+                playerDiv.textContent = `${player.emoji} (${player.rarity})`;
                 playersCollectionElement.appendChild(playerDiv);
             });
 
@@ -139,25 +137,35 @@
             }
         }
 
-        // Открытие карты
+        function getRandomPlayer() {
+            const random = Math.random();
+            let cumulativeChance = 0;
+
+            for (const player of emojiList) {
+                cumulativeChance += player.chance;
+                if (random < cumulativeChance) {
+                    return player;
+                }
+            }
+            return emojiList[emojiList.length - 1];
+        }
+
         document.getElementById("openCaseBtn").addEventListener("click", () => {
             if (coins >= 1) {
                 coins -= 1;
-                const newPlayer = "⚽"; // Пример игрока
+                const newPlayer = getRandomPlayer();
                 collection.push(newPlayer);
                 updateUI();
-                alert(`Вы получили: ${newPlayer}`);
+                alert(`Вы получили: ${newPlayer.emoji} (${newPlayer.rarity})`);
             } else {
                 alert("Недостаточно монет!");
             }
         });
 
-        // Получение монет
         document.getElementById("earnCoinsBtn").addEventListener("click", () => {
-            const chance = Math.random();
-            if (chance > 0.5) {
+            if (Math.random() > 0.5) {
                 coins += 10;
-                experience += 2; // Опыт только за победу
+                experience += 2;
                 updateUI();
                 alert("Вы выиграли 10 монет!");
             } else {
@@ -165,23 +173,6 @@
             }
         });
 
-        // Ежедневная награда
-        document.getElementById("dailyRewardBtn").addEventListener("click", () => {
-            coins += 20;
-            updateUI();
-            alert("Вы получили ежедневную награду: 20 монет!");
-        });
-
-        // Продажа игрока
-        function sellPlayer(index) {
-            const player = collection[index];
-            coins += 5; // Цена продажи
-            collection.splice(index, 1);
-            updateUI();
-            alert(`Вы продали: ${player}`);
-        }
-
-        // Обновить интерфейс при загрузке
         updateUI();
     </script>
 </body>
